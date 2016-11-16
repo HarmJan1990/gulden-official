@@ -3957,6 +3957,18 @@ void ProcessPriorityRequests(const std::shared_ptr<CBlock> blockRef) {
     }
 }
 
+bool FlushPriorityDownloads() {
+    LOCK(cs_main);
+    bool ret = blocksToDownloadFirst.empty();
+    blocksToDownloadFirst.clear();
+    return !ret;
+}
+
+size_t CountPriorityDownloads() {
+    LOCK(cs_main);
+    return blocksToDownloadFirst.size();
+}
+
 class CNetProcessingCleanup
 {
 public:
