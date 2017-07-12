@@ -2499,7 +2499,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 mapBlockSource.emplace(pblock->GetHashPoW2(), std::make_pair(pfrom->GetId(), false));
             }
             bool fNewBlock = false;
-            ProcessNewBlock(chainparams, pblock, true, &fNewBlock);
+            ProcessNewBlock(chainparams, pblock, true, &fNewBlock, false, true);
             if (fNewBlock)
                 pfrom->nLastBlockTime = GetTime();
 
@@ -2576,7 +2576,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             bool fNewBlock = false;
             // Since we requested this block (it was in mapBlocksInFlight), force it to be processed,
             // even if it would not be a candidate for new tip (missing previous block, chain not long enough, etc)
-            ProcessNewBlock(chainparams, pblock, true, &fNewBlock);
+            ProcessNewBlock(chainparams, pblock, true, &fNewBlock, false, true);
             if (fNewBlock)
                 pfrom->nLastBlockTime = GetTime();
         }
@@ -2903,12 +2903,13 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         // conditions in AcceptBlock().
         bool forceProcessing = pfrom->fWhitelisted && !IsInitialBlockDownload();
         bool fAssumePOWGood = false;
+        MarkBlockAsReceivedResult result;
         const uint256 hash(pblock->GetHashPoW2());
         {
             LOCK(cs_main);
             // Also always process if we requested the block explicitly, as we may
             // need it even though it is not a candidate for a new best tip.
-            MarkBlockAsReceivedResult result = MarkBlockAsReceived(hash);
+            result = MarkBlockAsReceived(hash);
             forceProcessing |= result.fRequested;
             // mapBlockSource is only used for sending reject messages and DoS scores,
             // so the race between here and cs_main in ProcessNewBlock is fine.
@@ -2921,7 +2922,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             }
         }
         bool fNewBlock = false;
-        ProcessNewBlock(chainparams, pblock, forceProcessing, &fNewBlock, fAssumePOWGood);
+        ProcessNewBlock(chainparams, pblock, forceProcessing, &fNewBlock, fAssumePOWGood, !result.fPriorityRequest);
         if (fNewBlock)
             pfrom->nLastBlockTime = GetTime();
     }
