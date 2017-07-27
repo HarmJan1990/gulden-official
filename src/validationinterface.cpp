@@ -30,6 +30,7 @@ void RegisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.BlockChecked.connect(boost::bind(&CValidationInterface::BlockChecked, pwalletIn, _1, _2));
     g_signals.ScriptForMining.connect(boost::bind(&CValidationInterface::GetScriptForMining, pwalletIn, _1, _2));
     g_signals.NewPoWValidBlock.connect(boost::bind(&CValidationInterface::NewPoWValidBlock, pwalletIn, _1, _2));
+    g_signals.ProcessPriorityRequest.connect(boost::bind(&CValidationInterface::ProcessPriorityRequest, pwalletIn, _1, _2));
 }
 
 void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
@@ -43,6 +44,7 @@ void UnregisterValidationInterface(CValidationInterface* pwalletIn) {
     g_signals.BlockDisconnected.disconnect(boost::bind(&CValidationInterface::BlockDisconnected, pwalletIn, _1));
     g_signals.UpdatedBlockTip.disconnect(boost::bind(&CValidationInterface::UpdatedBlockTip, pwalletIn, _1, _2, _3));
     g_signals.NewPoWValidBlock.disconnect(boost::bind(&CValidationInterface::NewPoWValidBlock, pwalletIn, _1, _2));
+    g_signals.ProcessPriorityRequest.disconnect(boost::bind(&CValidationInterface::ProcessPriorityRequest, pwalletIn, _1, _2));
 }
 
 void UnregisterAllValidationInterfaces() {
@@ -56,4 +58,5 @@ void UnregisterAllValidationInterfaces() {
     g_signals.BlockDisconnected.disconnect_all_slots();
     g_signals.UpdatedBlockTip.disconnect_all_slots();
     g_signals.NewPoWValidBlock.disconnect_all_slots();
+    g_signals.ProcessPriorityRequest.disconnect_all_slots();
 }
