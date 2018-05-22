@@ -75,6 +75,7 @@ CCriticalSection cs_main;
 
 BlockMap mapBlockIndex;
 CChain chainActive;
+CChain headerChain;
 CBlockIndex *pindexBestHeader = NULL;
 CWaitableCriticalSection csBestBlock;
 CConditionVariable cvBlockChange;
@@ -2135,7 +2136,10 @@ static CBlockIndex* AddToBlockIndex(const CChainParams& chainParams, const CBloc
 
     pindexNew->RaiseValidity(BLOCK_VALID_TREE);
     if (pindexBestHeader == NULL || pindexBestHeader->nChainWork < pindexNew->nChainWork)
+    {
         pindexBestHeader = pindexNew;
+        headerChain.SetTip(pindexBestHeader);
+    }
 
     setDirtyBlockIndex.insert(pindexNew);
 
@@ -3154,8 +3158,10 @@ bool static LoadBlockIndexDB(const CChainParams& chainparams)
             pindexBestInvalid = pindex;
         if (pindex->pprev)
             pindex->BuildSkip();
-        if (pindex->IsValid(BLOCK_VALID_TREE) && (pindexBestHeader == NULL || CBlockIndexWorkComparator()(pindexBestHeader, pindex)))
+        if (pindex->IsValid(BLOCK_VALID_TREE) && (pindexBestHeader == NULL || CBlockIndexWorkComparator()(pindexBestHeader, pindex))) {
             pindexBestHeader = pindex;
+            headerChain.SetTip(pindexBestHeader);
+        }
     }
 
     // Load block file info
@@ -3542,6 +3548,7 @@ void UnloadBlockIndex()
     chainActive.SetTip(NULL);
     pindexBestInvalid = NULL;
     pindexBestHeader = NULL;
+    headerChain.SetTip(nullptr);
     mempool.clear();
     mapBlocksUnlinked.clear();
     vinfoBlockFile.clear();
