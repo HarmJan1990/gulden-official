@@ -520,12 +520,7 @@ bool CWallet::InitLoadWallet()
 
 void CWallet::StartSPV()
 {
-    CWalletDB walletdb(*dbw);
-    CBlockLocator locator;
-    if (!walletdb.ReadLastSPVBlockProcessed(locator))
-        locator = chainActive.GetLocatorPoW2(chainActive.Genesis());
-
-    pSPVScanner = std::unique_ptr<CSPVScanner>(new CSPVScanner(*this, locator));
+    pSPVScanner = std::unique_ptr<CSPVScanner>(new CSPVScanner(*this));
     pSPVScanner->StartScan();
 }
 
