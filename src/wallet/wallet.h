@@ -876,6 +876,9 @@ public:
 
     bool BackupWallet(const std::string& strDest);
 
+    //! Chain height for wallets (height used depends on SPV).
+    static int ChainHeight();
+
     friend class CAccount;
 };
 
